@@ -1,0 +1,7 @@
+{
+  "name": "Gemini Strike: Tactical Sniper Sim",
+  "description": "A high-fidelity sniper simulation featuring Gemini 3-powered mission intelligence, dynamic spotter feedback, and procedural target profiles.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
