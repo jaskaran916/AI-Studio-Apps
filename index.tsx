@@ -50,6 +50,7 @@ interface Mission {
 const SCOPE_SIZE = 400;
 const AUDIO_SAMPLE_RATE = 24000;
 const MAX_PLAYER_HEALTH = 100;
+const TAGLINE = "PRECISION AT THE SPEED OF THOUGHT";
 
 // --- Helper Functions ---
 function decode(base64: string) {
@@ -98,7 +99,6 @@ const App = () => {
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        // Update prompt to include 'id' and match Objective union types
         contents: "Generate a multi-objective tactical sniper mission. Objectives: 1. recon, 2. destroy, 3. retrieve, 4. eliminate. Return JSON: {title, briefing, objectives: [{id, type, description}], environment, windSpeed, windDir}.",
         config: {
           responseMimeType: 'application/json',
@@ -112,7 +112,6 @@ const App = () => {
                 items: {
                   type: Type.OBJECT,
                   properties: {
-                    // Fix: Added missing 'id' to schema to satisfy Objective interface
                     id: { type: Type.STRING },
                     type: { type: Type.STRING },
                     description: { type: Type.STRING }
@@ -137,8 +136,6 @@ const App = () => {
     } catch (error: any) {
       console.error("Mission generation failed:", error);
       setIsLoading(false);
-      // Fallback local mission if API fails
-      // Fix: Added missing 'id' property to fallback objectives to satisfy Objective interface
       const fallback: Mission = {
         title: "SILENT ECHO",
         briefing: "API Connection lost. Proceeding with emergency tactical protocols. Clear the sector.",
@@ -329,13 +326,19 @@ const App = () => {
     if (!hit) createParticles(impactX, impactY, '#fff', 3, 1);
   }, [gameState, mission, currentObjIndex]);
 
-  if (isLoading) return <div className="flex items-center justify-center h-screen bg-black text-[#0f4] font-mono animate-pulse uppercase tracking-[0.2em]">Initialising_Neural_Strike_v3...</div>;
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center h-screen bg-black text-[#0f4] font-mono p-4 text-center">
+      <div className="animate-pulse uppercase tracking-[0.2em] text-lg mb-2">Initialising_Neural_Strike_v3...</div>
+      <div className="text-[10px] opacity-40 uppercase tracking-[0.4em]">{TAGLINE}</div>
+    </div>
+  );
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black font-mono">
       {gameState === 'briefing' && mission && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/95 p-8">
           <div className="max-w-2xl border border-[#0f4] p-10 bg-black shadow-[0_0_30px_rgba(0,255,68,0.1)]">
+            <div className="text-[10px] text-[#0f4] opacity-50 mb-1 tracking-[0.3em] font-bold">{TAGLINE}</div>
             <h2 className="text-3xl font-bold mb-4 text-[#0f4] tracking-tighter">OP_ORDER: {mission.title}</h2>
             <p className="mb-8 opacity-80 leading-relaxed text-sm">{mission.briefing}</p>
             <div className="mb-8 border-l-2 border-[#0f4]/30 pl-4 space-y-2">
@@ -363,6 +366,9 @@ const App = () => {
       <div className="absolute top-6 left-6 text-[#0f4] pointer-events-none select-none">
         <div className="text-2xl font-bold tracking-tighter">HEALTH: {healthUI}%</div>
         <div className="text-xs opacity-60 uppercase mt-1">OBJ: {mission?.objectives[currentObjIndex]?.description}</div>
+      </div>
+      <div className="absolute bottom-6 left-6 text-[#0f4] text-[9px] opacity-40 select-none pointer-events-none tracking-widest uppercase">
+        {TAGLINE}
       </div>
       <div className="absolute bottom-6 right-6 text-[#0f4] text-[10px] opacity-30 select-none pointer-events-none">
         GEMINI_NEURAL_LINK_STABLE // VERSION_3.0_FLASH
